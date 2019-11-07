@@ -10,11 +10,11 @@ import (
 	"github.com/akamensky/argparse"
 )
 
-func parseArgs() (input, output string, unobfustactionFlag bool) {
-	parser := argparse.NewParser("main.go", "Obfuscate/Unobfuscate text from input file")
+func parseArgs() (input, output string, deobfustactionFlag bool) {
+	parser := argparse.NewParser("main.go", "Obfuscate/Deobfuscate text from input file")
 	i := parser.String("i", "input", &argparse.Options{Required: true, Help: "Path to input file (required)"})
 	o := parser.String("o", "output", &argparse.Options{Required: false, Help: "Path to output file (by default: [input file].result)"})
-	u := parser.Flag("u", "unobfuscate", &argparse.Options{Required: false, Help: "Unobfuscation flag"})
+	d := parser.Flag("d", "deobfuscate", &argparse.Options{Required: false, Help: "Deobfuscation flag"})
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
@@ -23,11 +23,11 @@ func parseArgs() (input, output string, unobfustactionFlag bool) {
 	if *o == "" {
 		*o = *i + ".result"
 	}
-	return *i, *o, *u
+	return *i, *o, *d
 }
 
 func main() {
-	i, o, u := parseArgs()
+	i, o, d := parseArgs()
 	input, iErr := os.Open(i)
 	output, oErr := os.OpenFile(o, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0666)
 
@@ -44,8 +44,8 @@ func main() {
 	for {
 		if line, rErr := reader.ReadString('\n'); rErr == nil {
 			var newLine string
-			if u {
-				newLine = lib.Unobfuscate(line)
+			if d {
+				newLine = lib.Deobfuscate(line)
 			} else {
 				newLine = lib.Obfuscate(line)
 			}

@@ -32,6 +32,6 @@ func Obfuscate(s string) (result string) {
 	return applyMask(s, source, target)
 }
 
-func Unobfuscate(s string) (result string) {
+func Deobfuscate(s string) (result string) {
 	return applyMask(s, target, source)
 }
