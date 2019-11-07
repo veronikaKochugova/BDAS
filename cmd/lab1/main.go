@@ -45,11 +45,13 @@ func Unobfuscate(s string) (result string) {
 func main() {
 	input, iErr := os.Open("examples/example.xml")
 	output, oErr := os.OpenFile("examples/obfuscated-example.xml", os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0666)
+
 	defer input.Close()
 	defer output.Close()
 
 	if iErr != nil || oErr != nil {
 		log.Fatal(iErr, oErr)
+		return
 	}
 
 	reader := bufio.NewReader(input)
@@ -59,12 +61,12 @@ func main() {
 			obfuscated := Obfuscate(line)
 			fmt.Println(obfuscated)
 			if _, wErr := writer.WriteString(obfuscated); wErr != nil {
-				fmt.Println("Write error: ", wErr)
+				log.Fatal("Write error: ", wErr)
 				break
 			}
 		} else {
 			break
 		}
 	}
-
+	writer.Flush()
 }
