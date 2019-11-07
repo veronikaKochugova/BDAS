@@ -28,10 +28,12 @@ func applyMask(data, src, trg string) (result string) {
 	return result
 }
 
+// Obfuscate string.
 func Obfuscate(s string) (result string) {
 	return applyMask(s, source, target)
 }
 
+// Deobfuscate string.
 func Deobfuscate(s string) (result string) {
 	return applyMask(s, target, source)
 }
