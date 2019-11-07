@@ -1,38 +1,70 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+)
 
 const (
-	source = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	target = "Q5A8ZWS0XEDC6RFVT9GBY4HNU3J2MI1KO7LP"
+	sourceAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	targetAlpha = "QAZWSXEDCRFVTGBYHNUJMIKOLP"
+	sourceDigh  = "0123456789"
+	targetDigh  = "2534678901"
+)
+
+var (
+	source = sourceAlpha + strings.ToLower(sourceAlpha) + sourceDigh
+	target = targetAlpha + strings.ToLower(targetAlpha) + targetDigh
 )
 
 func Obfuscate(s string) (result string) {
-	// public static String obfuscate(String s) {
-	// 	char[] result= new char[10];
-	// 	for (int i=0;i<s.length();i++) {
-	// 	char c=s.charAt(i);
-	// 	int index=source.indexOf(c);
-	// 	result[i]=target.charAt(index);
-	// 	}
-	// 	return new String(result);
-	// 	}
-	return source
+	for _, r := range s {
+		si := strings.Index(source, string(r))
+		if si != -1 {
+			result += string(target[si])
+		} else {
+			result += string(r)
+		}
+	}
+	return result
 }
 
 func Unobfuscate(s string) (result string) {
-	// 	public static String unobfuscate(String s) {
-	// 	char[] result= new char[10];
-	// 	for (int i=0;i<s.length();i++) {
-	// 	char c=s.charAt(i);
-	// 	int index=target.indexOf(c);
-	// 	result[i]=source.charAt(index);
-	// 	}
-	// 	return new String(result);
-	// 	}
-	return target
+	for _, r := range s {
+		// TODO specific symbols
+		ti := strings.Index(target, string(r))
+		sr := source[ti]
+		result += string(sr)
+	}
+	return result
 }
 
 func main() {
-	fmt.Println("Hello")
+	input, iErr := os.Open("examples/example.xml")
+	output, oErr := os.OpenFile("examples/obfuscated-example.xml", os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0666)
+	defer input.Close()
+	defer output.Close()
+
+	if iErr != nil || oErr != nil {
+		log.Fatal(iErr, oErr)
+	}
+
+	reader := bufio.NewReader(input)
+	writer := bufio.NewWriter(output)
+	for {
+		if line, rErr := reader.ReadString('\n'); rErr == nil {
+			obfuscated := Obfuscate(line)
+			fmt.Println(obfuscated)
+			if _, wErr := writer.WriteString(obfuscated); wErr != nil {
+				fmt.Println("Write error: ", wErr)
+				break
+			}
+		} else {
+			break
+		}
+	}
+
 }
