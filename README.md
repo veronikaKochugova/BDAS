@@ -111,7 +111,7 @@ To deobfuscate file without specifying a output file:
 
 To run unit tests manualy with coverage stats:
 ```
-go test -cover .\cmd\lab1\obfuscation\
+go test -cover ./cmd/lab1/obfuscation/
 ```
 
 *100% coverage*
