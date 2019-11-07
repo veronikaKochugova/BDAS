@@ -5,46 +5,31 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
+
+	lib "./obfuscation"
+	"github.com/akamensky/argparse"
 )
 
-const (
-	sourceAlpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	targetAlpha = "QAZWSXEDCRFVTGBYHNUJMIKOLP"
-	sourceDigh  = "0123456789"
-	targetDigh  = "2534678901"
-)
-
-var (
-	source = sourceAlpha + strings.ToLower(sourceAlpha) + sourceDigh
-	target = targetAlpha + strings.ToLower(targetAlpha) + targetDigh
-)
-
-func Obfuscate(s string) (result string) {
-	for _, r := range s {
-		si := strings.Index(source, string(r))
-		if si != -1 {
-			result += string(target[si])
-		} else {
-			result += string(r)
-		}
+func parseArgs() (input, output string, unobfustactionFlag bool) {
+	parser := argparse.NewParser("main.go", "Obfuscate/Unobfuscate text from input file")
+	i := parser.String("i", "input", &argparse.Options{Required: true, Help: "Path to input file (required)"})
+	o := parser.String("o", "output", &argparse.Options{Required: false, Help: "Path to output file (by default: [input file].result)"})
+	u := parser.Flag("u", "unobfuscate", &argparse.Options{Required: false, Help: "Unobfuscation flag"})
+	err := parser.Parse(os.Args)
+	if err != nil {
+		fmt.Print(parser.Usage(err))
 	}
-	return result
-}
-
-func Unobfuscate(s string) (result string) {
-	for _, r := range s {
-		// TODO specific symbols
-		ti := strings.Index(target, string(r))
-		sr := source[ti]
-		result += string(sr)
+	// If an output is not specified, then an input with a suffix ".result" is used.
+	if *o == "" {
+		*o = *i + ".result"
 	}
-	return result
+	return *i, *o, *u
 }
 
 func main() {
-	input, iErr := os.Open("examples/example.xml")
-	output, oErr := os.OpenFile("examples/obfuscated-example.xml", os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0666)
+	i, o, u := parseArgs()
+	input, iErr := os.Open(i)
+	output, oErr := os.OpenFile(o, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0666)
 
 	defer input.Close()
 	defer output.Close()
@@ -58,9 +43,13 @@ func main() {
 	writer := bufio.NewWriter(output)
 	for {
 		if line, rErr := reader.ReadString('\n'); rErr == nil {
-			obfuscated := Obfuscate(line)
-			fmt.Println(obfuscated)
-			if _, wErr := writer.WriteString(obfuscated); wErr != nil {
+			var newLine string
+			if u {
+				newLine = lib.Unobfuscate(line)
+			} else {
+				newLine = lib.Obfuscate(line)
+			}
+			if _, wErr := writer.WriteString(newLine); wErr != nil {
 				log.Fatal("Write error: ", wErr)
 				break
 			}
