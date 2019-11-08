@@ -1,56 +1,99 @@
 package main
 
 import (
-	"crypto/rand"
 	"crypto/x509"
+	"encoding/pem"
 	"fmt"
-	"os"
+	"io/ioutil"
+
+	"golang.org/x/crypto/pkcs12"
 )
 
 func main() {
 
+	// Load public certificate
+	buf, err := ioutil.ReadFile("examples/public.cer")
+	fmt.Println(err)
+	fmt.Println(buf)
+
+	// Decode certificate fron buffer and create block
+	block, _ := pem.Decode([]byte(buf))
+	if block == nil {
+		panic("failed to parse certificate PEM")
+	}
+
+	// Parse block and create x509.Certificate instance
 	cert, err := x509.ParseCertificate(block.Bytes)
 
-	blockType := "RSA PRIVATE KEY"
-	password := []byte("password")
+	fmt.Println(err)
+	fmt.Println(cert)
 
-	// see http://golang.org/pkg/crypto/x509/#pkg-constants
-	cipherType := x509.PEMCipherAES256
+	// blockType := "RSA PRIVATE KEY"
+	keyPassword := []byte("password")
+	// keystorePassword := []byte("password")
 
-	EncryptedPEMBlock, err := x509.EncryptPEMBlock(rand.Reader,
-		blockType,
-		[]byte("secret message"),
-		password,
-		cipherType)
+	p12, _ := ioutil.ReadFile("examples/private.p12")
 
+	blocks, err := pkcs12.ToPEM(p12, string(keyPassword))
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		panic(err)
 	}
+	fmt.Println(blocks)
 
-	// check if encryption is successful or not
+	// var pemData []byte
+	// for _, b := range blocks {
+	// 	pemData = append(pemData, pem.EncodeToMemory(b)...)
+	// }
 
-	if !x509.IsEncryptedPEMBlock(EncryptedPEMBlock) {
-		fmt.Println("PEM Block is not encrypted!")
-		os.Exit(1)
-	}
+	// // then use PEM data for tls to construct tls certificate:
+	// cert, err := tls.X509KeyPair(pemData, pemData)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	if EncryptedPEMBlock.Type != blockType {
-		fmt.Println("Block type is wrong!")
-		os.Exit(1)
-	}
+	// config := &tls.Config{
+	// 	Certificates: []tls.Certificate{cert},
+	// }
 
-	fmt.Printf("Encrypted block \n%v\n", EncryptedPEMBlock)
+	// _ = config
 
-	fmt.Printf("Encrypted Block Headers Info : %v\n", EncryptedPEMBlock.Headers)
+	// // see http://golang.org/pkg/crypto/x509/#pkg-constants
+	// cipherType := x509.PEMCipherAES256
 
-	DecryptedPEMBlock, err := x509.DecryptPEMBlock(EncryptedPEMBlock, password)
+	// EncryptedPEMBlock, err := x509.EncryptPEMBlock(rand.Reader,
+	// 	blockType,
+	// 	[]byte("secret message"),
+	// 	password,
+	// 	cipherType)
 
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
 
-	fmt.Printf("Decrypted block message is :  \n%s\n", DecryptedPEMBlock)
+	// // check if encryption is successful or not
+
+	// if !x509.IsEncryptedPEMBlock(EncryptedPEMBlock) {
+	// 	fmt.Println("PEM Block is not encrypted!")
+	// 	os.Exit(1)
+	// }
+
+	// if EncryptedPEMBlock.Type != blockType {
+	// 	fmt.Println("Block type is wrong!")
+	// 	os.Exit(1)
+	// }
+
+	// fmt.Printf("Encrypted block \n%v\n", EncryptedPEMBlock)
+
+	// fmt.Printf("Encrypted Block Headers Info : %v\n", EncryptedPEMBlock.Headers)
+
+	// DecryptedPEMBlock, err := x509.DecryptPEMBlock(EncryptedPEMBlock, password)
+
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
+
+	// fmt.Printf("Decrypted block message is :  \n%s\n", DecryptedPEMBlock)
 
 }
