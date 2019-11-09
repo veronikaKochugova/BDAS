@@ -9,6 +9,31 @@ import (
 	"golang.org/x/crypto/pkcs12"
 )
 
+// public static byte[] encryptData(byte[] data,
+// X509Certificate encryptionCertificate)
+// throws CertificateEncodingException, CMSException, IOException {
+// byte[] encryptedData = null;
+// if (null != data && null != encryptionCertificate) {
+// CMSEnvelopedDataGenerator cmsEnvelopedDataGenerator
+// = new CMSEnvelopedDataGenerator();
+// JceKeyTransRecipientInfoGenerator jceKey
+// = new JceKeyTransRecipientInfoGenerator(encryptionCertificate);
+// cmsEnvelopedDataGenerator.addRecipientInfoGenerator(jceKey);
+// CMSTypedData msg = new CMSProcessableByteArray(data);
+// OutputEncryptor encryptor
+// = new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES128_CBC)
+// .setProvider("BC").build();
+// CMSEnvelopedData cmsEnvelopedData = cmsEnvelopedDataGenerator
+// .generate(msg,encryptor);
+// encryptedData = cmsEnvelopedData.getEncoded();
+// }
+// return encryptedData;
+// }
+
+func encryptData(cer x509.Certificate, keyStore pkcs12.KeyStore) {
+
+}
+
 func main() {
 
 	// Load public certificate
@@ -32,29 +57,12 @@ func main() {
 	keyPassword := []byte("password")
 	// keystorePassword := []byte("password")
 
+	// Create Private PKCS12 KeyStore
 	p12, _ := ioutil.ReadFile("examples/private.p12")
-
 	blocks, err := pkcs12.ToPEM(p12, string(keyPassword))
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(blocks)
-
-	// var pemData []byte
-	// for _, b := range blocks {
-	// 	pemData = append(pemData, pem.EncodeToMemory(b)...)
-	// }
-
-	// // then use PEM data for tls to construct tls certificate:
-	// cert, err := tls.X509KeyPair(pemData, pemData)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// config := &tls.Config{
-	// 	Certificates: []tls.Certificate{cert},
-	// }
-
-	// _ = config
 
 }
