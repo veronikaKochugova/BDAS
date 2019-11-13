@@ -6,6 +6,8 @@ import (
 	lib "./crypto"
 )
 
+// TODO: add argparse
+// TODO: add sign
 func main() {
 	cert := lib.GetCertificate("examples/public.cer")
 	keyStore := lib.GetKeyStore("examples/private.p12", "password")
