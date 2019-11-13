@@ -8,7 +8,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
-	"os"
 
 	"golang.org/x/crypto/pkcs12"
 )
@@ -19,7 +18,6 @@ import (
 func checkError(err error) {
 	if err != nil {
 		fmt.Println("Fatal error ", err.Error())
-		os.Exit(1)
 	}
 }
 
@@ -30,9 +28,6 @@ func GetCertificate(file string) x509.Certificate {
 
 	// Decode certificate from buffer and create block
 	block, _ := pem.Decode([]byte(buf))
-	if block == nil {
-		panic("failed to parse certificate PEM")
-	}
 
 	// Parse block and create x509.Certificate instance
 	cert, err := x509.ParseCertificate(block.Bytes)

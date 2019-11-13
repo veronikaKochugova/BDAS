@@ -13,6 +13,7 @@ func main() {
 	keyStore := lib.GetKeyStore("examples/private.p12", "password")
 
 	pubKey := lib.GetPublicKeyFromCert(cert)
+	fmt.Println(*pubKey)
 	privKey := lib.GetPrivateKeyFromKeyStore(keyStore)
 
 	secret := "Secret msg!"
